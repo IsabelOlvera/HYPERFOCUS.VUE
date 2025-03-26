@@ -14,8 +14,8 @@ Route::get('/', function () {
     ]);
 });
 
-// use App\Http\Controllers\WeekController;
-// Route::get('/week', [WeekController::class, 'index'])->name('week');
+use App\Http\Controllers\WeekController;
+Route::get('/week', [WeekController::class, 'index'])->name('week');
 
 use App\Http\Controllers\FocusController;
 Route::get('/focus', [FocusController::class, 'index'])->name('focus');
