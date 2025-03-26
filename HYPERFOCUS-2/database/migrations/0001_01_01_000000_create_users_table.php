@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('edad')->nullable();
             $table->unsignedBigInteger('rol_id');
             $table->boolean('estatus')->default(1);
+            $table->rememberToken();
             $table->timestamps();
 
             // Definir clave foránea
