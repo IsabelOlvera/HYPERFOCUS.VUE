@@ -5,20 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Conjunto extends Model
+class Concepto extends Model
 {
     use HasFactory;
     
-    protected $table = 'conjuntos';
+    protected $table = 'conceptos';
     
     protected $fillable = [
         'nombre',
-        'descripcion',
-        'fecha_creacion'
+        'definicion',
+        'conjunto_id'
     ];
     
-    public function conceptos()
+    public function conjunto()
     {
-        return $this->hasMany(Concepto::class);
+        return $this->belongsTo(Conjunto::class);
     }
 }

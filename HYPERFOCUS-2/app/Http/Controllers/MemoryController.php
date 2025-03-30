@@ -8,17 +8,17 @@ use App\Models\Conjunto;
 
 class MemoryController extends Controller 
 {     
-    public function index()
-{
-    $conjuntos = Conjunto::all();
-    
-    return Inertia::render('Memory', [
-        'conjuntos' => $conjuntos,
-        'flash' => [
-            'success' => session('success')
-        ]
-    ]);
-}
+   
+    public function index() {
+        $conjuntos = Conjunto::with('conceptos')->get();
+        
+        return Inertia::render('Memory', [
+            'conjuntos' => $conjuntos,
+            'flash' => [
+                'success' => session('success')
+            ]
+        ]);
+    }
     
     public function store(Request $request)
     {
