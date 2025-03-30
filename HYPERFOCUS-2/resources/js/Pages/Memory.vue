@@ -23,6 +23,10 @@ const successMessage = ref('');
 const showDeleteModal = ref(false);
 const deletingConjuntoId = ref(null);
 
+// Variables para modal de confirmación de práctica
+const showPracticaModal = ref(false);
+const practicaConjuntoId = ref(null);
+
 
 const form = useForm({
     nombre: '',
@@ -99,6 +103,22 @@ const cancelDelete = () => {
     deletingConjuntoId.value = null;
 };
 
+// Funciones para el modal de confirmación de práctica
+const iniciarPractica = (id) => {
+    practicaConjuntoId.value = id;
+    showPracticaModal.value = true;
+};
+
+const confirmPractica = () => {
+    router.get(route('practicar.index', practicaConjuntoId.value));
+    showPracticaModal.value = false;
+};
+
+const cancelPractica = () => {
+    showPracticaModal.value = false;
+    practicaConjuntoId.value = null;
+};
+
 const showSuccess = (message) => {
   successMessage.value = message;
   showSuccessModal.value = true;
@@ -142,7 +162,12 @@ const showSuccess = (message) => {
                         <p class="text-sm text-gray-500 mt-2">Creado: {{ new Date(conjunto.fecha_creacion).toLocaleDateString() }}</p>
                         <hr class="my-2 border-gray-400" />
                         <div class="space-y-3 mt-4">
-                            <button class="w-full bg-purple-400 text-white px-4 py-2 rounded-lg">Practicar</button>
+                            
+                        <button @click="iniciarPractica(conjunto.id)" 
+                            class="w-full bg-purple-400 text-white px-4 py-2 rounded-lg">
+                            Practicar
+                        </button>
+
                             <button @click="openEditModal(conjunto)" 
                                     class="w-full bg-blue-400 text-white px-4 py-2 rounded-lg">Editar</button>
                             <button @click="deleteConjunto(conjunto.id)" 
@@ -251,6 +276,19 @@ const showSuccess = (message) => {
         <div class="flex justify-end">
             <button type="button" @click="cancelDelete" class="bg-gray-300 text-gray-800 px-4 py-2 rounded mr-2">Cancelar</button>
             <button type="button" @click="confirmDelete" class="bg-red-500 text-white px-4 py-2 rounded">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación de práctica -->
+<div v-if="showPracticaModal" class="fixed inset-0 flex items-center justify-center z-50">
+    <div class="absolute inset-0 bg-black opacity-50" @click="cancelPractica"></div>
+    <div class="bg-white p-6 rounded-lg shadow-lg z-10 max-w-md w-full">
+        <h2 class="text-2xl font-bold mb-4">Confirmar práctica</h2>
+        <p class="mb-6 text-gray-700">¿Estás seguro de que deseas iniciar una práctica con este conjunto?</p>
+        <div class="flex justify-end">
+            <button type="button" @click="cancelPractica" class="bg-gray-300 text-gray-800 px-4 py-2 rounded mr-2">Cancelar</button>
+            <button type="button" @click="confirmPractica" class="bg-purple-500 text-white px-4 py-2 rounded">Comenzar</button>
         </div>
     </div>
 </div>

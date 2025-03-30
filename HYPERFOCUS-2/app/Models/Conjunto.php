@@ -21,4 +21,17 @@ class Conjunto extends Model
     {
         return $this->hasMany(Concepto::class);
     }
+
+    public function practicas()
+    {
+    return $this->hasMany(Practica::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+
+    
 }
