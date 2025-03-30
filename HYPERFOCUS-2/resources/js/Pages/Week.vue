@@ -33,6 +33,7 @@ const form = useForm({
 });
 
 
+
 // Agregar actividad SweetAlert y envio de datos
 const submitActivity = async () => {
     try {
@@ -189,6 +190,44 @@ const eliminarActividad = async () => {
 };
 
 
+const actividadesSeleccionadas = ref([]);
+
+const marcarCompletadas = async () => {
+
+    try {
+        console.log(actividadesSeleccionadas.value);
+        const response = await fetch('/week/completar', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ ids: actividadesSeleccionadas.value })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            Swal.fire({
+                title: 'Actividades Completadas',
+                text: 'Las actividades seleccionadas han sido marcadas como completadas.',
+                icon: 'success',
+                showConfirmButton: false,
+                timer: 1500
+            });
+            obtenerActividadesActualizadas(); // Recargar actividades
+        } else {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudieron marcar las actividades.',
+                icon: 'error'
+            });
+        }
+    } catch (error) {
+        console.error("Error al actualizar actividades:", error);
+    }
+};
+
+
 
 
 </script>
@@ -216,120 +255,211 @@ const eliminarActividad = async () => {
             <div class="flex-1 py-6 px-8">
                 <div class="grid grid-cols-12 gap-4">
                     <!-- Sección Izquierda (Días de la Semana) -->
-                    <div class="col-span-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-                        <div class="space-y-4">
+                    <div class="col-span-12 bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                        <div class=" grid grid-cols-7 gap-1">
                             <!-- LUNES -->
-                            <div>
-                                <h3 class="font-bold  text-lg text-purple-600">Lunes</h3>
-                                <ul v-if="lunes && lunes.length > 0" class="list-disc pl-4 text-gray-700 dark:text-gray-300">
+                            <div class="col-span-1 border-x border-gray-500 p-4">
+                                <h3 class="font-bold mb-1 mr-black text-center text-lg text-purple-600">Lunes</h3>
+                                <hr class="mb-5 border-gray-300">
+                                <ul v-if="lunes && lunes.length > 0" class="list-disc text-gray-700 dark:text-gray-300">
                                     <ol v-for="(item, index) in lunes" :key="index" class=" ">
-                                        <div class="flex justify-between items-center">
+                                        <div >
                                             <div>
-                                                <input type="checkbox" class="mr-2">{{ item.act }} 
+                                                <div v-if="item.completada === 1" class="flex justify-between items-center" >
+                                                    <div>
+                                                        <input  type="checkbox" class="mr-2"   checked >{{ item.act }}
+                                                    </div>
+                                                    <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
+                                                </div>
+                                                <div v-else class="flex justify-between items-center">
+                                                    <div>
+                                                        <input  type="checkbox" class="mr-2"  v-model="actividadesSeleccionadas" :value="item.id" >{{ item.act }}
+                                                    </div>
+                                                    <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
+                                                </div> 
                                             </div>
-                                            <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
+                                            
                                         </div>    
                                     </ol>
                                 </ul>
                                 <p v-else class="ml-3">No hay actividades.</p>
-                                <hr class="my-2 border-gray-300">
+                                
+                                <!-- <hr class="my-2 border-gray-300"> -->
                             </div>
                             <!-- MARTES -->
-                            <div>
-                                <h3 class="font-bold text-lg text-purple-600">Martes</h3>
-                                <ul v-if="martes && martes.length > 0" class="list-disc pl-4 text-gray-700 dark:text-gray-300">
+                            <div class="col-span-1 border-r border-gray-500 p-4">
+                                <h3 class="font-bold mb-1 text-lg text-center text-purple-600">Martes</h3>
+                                <hr class="mb-5 border-gray-300">
+                                <ul v-if="martes && martes.length > 0" class="list-disc text-gray-700 dark:text-gray-300">
                                     <ol v-for="(item, index) in martes" :key="index" class="">
-                                        <div class="flex justify-between items-center">
+                                        <div class="">
                                             <div>
-                                                <input type="checkbox" class="mr-2">{{ item.act }} 
+                                                <div v-if="item.completada === 1" class="flex justify-between items-center" >
+                                                    <div>
+                                                        <input  type="checkbox" class="mr-2"   checked >{{ item.act }}
+                                                    </div>
+                                                    <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
+                                                </div>
+                                                <div v-else class="flex justify-between items-center">
+                                                    <div>
+                                                        <input  type="checkbox" class="mr-2"  v-model="actividadesSeleccionadas" :value="item.id" >{{ item.act }}
+                                                    </div>
+                                                    <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
+                                                </div> 
                                             </div>
-                                            <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
                                         </div>
                                     </ol>
                                 </ul>
                                 <p v-else class="ml-3">No hay actividades.</p>
-                                <hr class="my-2 border-gray-300">
+                                <!-- <hr class="my-2 border-gray-300"> -->
                             </div>
                             <!-- MIERCOLES -->
-                            <div>
-                                <h3 class="font-bold text-lg text-purple-600">Miercoles</h3>
-                                <ul v-if="miercoles && miercoles.length > 0" class="list-disc pl-4 text-gray-700 dark:text-gray-300">
+                            <div class="col-span-1 border-r border-gray-500 p-4">
+                                <h3 class="font-bold mb-1 text-lg text-center text-purple-600">Miercoles</h3>
+                                <hr class="mb-5 border-gray-300">
+                                <ul v-if="miercoles && miercoles.length > 0" class="list-disc  text-gray-700 dark:text-gray-300">
                                     <ol v-for="(item, index) in miercoles" :key="index" class="">
-                                        <div class="flex justify-between items-center">
+                                        <div >
                                             <div>
-                                                <input type="checkbox" class="mr-2">{{ item.act }} 
+                                                <div v-if="item.completada === 1" class="flex justify-between items-center" >
+                                                    <div>
+                                                        <input  type="checkbox" class="mr-2"   checked >{{ item.act }}
+                                                    </div>
+                                                    <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
+                                                </div>
+                                                <div v-else class="flex justify-between items-center">
+                                                    <div>
+                                                        <input  type="checkbox" class="mr-2"  v-model="actividadesSeleccionadas" :value="item.id" >{{ item.act }}
+                                                    </div>
+                                                    <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
+                                                </div> 
                                             </div>
-                                            <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
                                         </div>
                                     </ol>
                                 </ul>
                                 <p v-else class="ml-3">No hay actividades.</p>
-                                <hr class="my-2 border-gray-300">
+                                <!-- <hr class="my-2 border-gray-300"> -->
                             </div>
                             <!-- JUEVES -->
-                            <div>
-                                <h3 class="font-bold text-lg text-purple-600">Jueves</h3>
-                                <ul v-if="jueves && jueves.length > 0"  class="list-disc pl-4 text-gray-700 dark:text-gray-300">
+                            <div class="col-span-1 border-r border-gray-500 p-4">
+                                <h3 class="font-bold mb-1 text-lg text-center text-purple-600">Jueves</h3>
+                                <hr class="mb-5 border-gray-300">
+                                <ul v-if="jueves && jueves.length > 0"  class="list-disc text-gray-700 dark:text-gray-300">
                                     <ol v-for="(item, index) in jueves" :key="index" class="">
-                                        <div class="flex justify-between items-center">
+                                        <div >
                                             <div>
-                                                <input type="checkbox" class="mr-2">{{ item.act }} 
+                                                <div v-if="item.completada === 1" class="flex justify-between items-center" >
+                                                    <div>
+                                                        <input  type="checkbox" class="mr-2"   checked >{{ item.act }}
+                                                    </div>
+                                                    <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
+                                                </div>
+                                                <div v-else class="flex justify-between items-center">
+                                                    <div>
+                                                        <input  type="checkbox" class="mr-2"  v-model="actividadesSeleccionadas" :value="item.id" >{{ item.act }}
+                                                    </div>
+                                                    <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
+                                                </div> 
                                             </div>
-                                            <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
                                         </div>
                                     </ol>
                                 </ul>
                                 <p v-else class="ml-3">No hay actividades.</p>
-                                <hr class="my-2 border-gray-300">
+                                <!-- <hr class="my-2 border-gray-300"> -->
                             </div>
                             <!-- VIERNES -->
-                            <div>
-                                <h3 class="font-bold text-lg text-purple-600">Viernes</h3>
-                                <ul v-if="viernes && viernes.length > 0" class="list-disc pl-4 text-gray-700 dark:text-gray-300">
+                            <div class="col-span-1 border-r border-gray-500 p-4">
+                                <h3 class="font-bold mb-1 text-lg text-center text-purple-600">Viernes</h3>
+                                <hr class="mb-5 border-gray-300">
+                                <ul v-if="viernes && viernes.length > 0" class="list-disc  text-gray-700 dark:text-gray-300">
                                     <ol v-for="(item, index) in viernes" :key="index" class="">
-                                        <div class="flex justify-between items-center">
+                                        <div >
                                             <div>
-                                                <input type="checkbox" class="mr-2">{{ item.act }} 
+                                                <div v-if="item.completada === 1" class="flex justify-between items-center" >
+                                                    <div>
+                                                        <input  type="checkbox" class="mr-2"   checked >{{ item.act }}
+                                                    </div>
+                                                    <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
+                                                </div>
+                                                <div v-else class="flex justify-between items-center">
+                                                    <div>
+                                                        <input  type="checkbox" class="mr-2"  v-model="actividadesSeleccionadas" :value="item.id" >{{ item.act }}
+                                                    </div>
+                                                    <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
+                                                </div> 
                                             </div>
-                                            <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
                                         </div>
                                     </ol>
                                 </ul>
                                 <p v-else class="ml-3">No hay actividades.</p>
-                                <hr class="my-2 border-gray-300">
+                                <!-- <hr class="my-2 border-gray-300"> -->
                             </div>
                             <!-- SABADO -->
-                            <div>
-                                <h3 class="font-bold text-lg text-purple-600">Sabado</h3>
-                                <ul v-if="sabado && sabado.length > 0" class="list-disc pl-4 text-gray-700 dark:text-gray-300">
+                            <div class="col-span-1 border-r border-gray-500 p-4">
+                                <h3 class="font-bold mb-1 text-lg text-center text-purple-600">Sabado</h3>
+                                <hr class="mb-5 border-gray-300">
+                                <ul v-if="sabado && sabado.length > 0" class="list-disc text-gray-700 dark:text-gray-300">
                                     <ol v-for="(item, index) in sabado" :key="index" class="">
-                                        <div class="flex justify-between items-center">
+                                        <div >
                                             <div>
-                                                <input type="checkbox" class="mr-2">{{ item.act }} 
+                                                <div v-if="item.completada === 1" class="flex justify-between items-center" >
+                                                    <div>
+                                                        <input  type="checkbox" class="mr-2"   checked >{{ item.act }}
+                                                    </div>
+                                                    <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
+                                                </div>
+                                                <div v-else class="flex justify-between items-center">
+                                                    <div>
+                                                        <input  type="checkbox" class="mr-2"  v-model="actividadesSeleccionadas" :value="item.id" >{{ item.act }}
+                                                    </div>
+                                                    <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
+                                                </div> 
                                             </div>
-                                            <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
                                         </div>
                                     </ol>
                                 </ul>
                                 <p v-else class="ml-3">No hay actividades.</p>
-                                <hr class="my-2 border-gray-300">
-                            </div>
+                                <!-- <hr class="my-2 border-gray-300"> -->
+                            </div >
                             <!-- DOMINGO -->
-                            <div>
-                                <h3 class="font-bold text-lg text-purple-600">Domingo</h3>
-                                <ul v-if="domingo && domingo.length > 0" class="list-disc pl-4 text-gray-700 dark:text-gray-300" >
+                            <div class="col-span-1 border-r border-gray-500 p-4" >
+                                <h3 class="font-bold mb-1 text-lg text-center text-purple-600">Domingo</h3>
+                                <hr class="mb-5 border-gray-300">
+                                <ul v-if="domingo && domingo.length > 0" class="list-disc text-gray-700 dark:text-gray-300" >
                                     <ol v-for="(item, index) in domingo" :key="index" class="">
-                                        <div class="flex justify-between items-center">
+                                        <div >
                                             <div>
-                                                <input type="checkbox" class="mr-2">{{ item.act }} 
+                                                <div v-if="item.completada === 1" class="flex justify-between items-center" >
+                                                    <div>
+                                                        <input  type="checkbox" class="mr-2"   checked >{{ item.act }}
+                                                    </div>
+                                                    <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
+                                                </div>
+                                                <div v-else class="flex justify-between items-center">
+                                                    <div>
+                                                        <input  type="checkbox" class="mr-2"  v-model="actividadesSeleccionadas" :value="item.id" >{{ item.act }}
+                                                    </div>
+                                                    <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
+                                                </div> 
                                             </div>
-                                            <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center">❌</button>
                                         </div>
                                     </ol>
                                 </ul>
                                 <p v-else class="ml-3">No hay actividades.</p>
-                                <hr class="my-2 border-gray-300">
+                                <!-- <hr class="my-2 border-gray-300"> -->
+                                 <!-- <div class="flex justify-center items-center mt-10">
+                                    <button @click="openModal(item)" class=" text-sm font-semibold text-red text-red-400 text-center px-12  border rounded-full  border-purple-600">➕</button>
+                                 </div> -->
                             </div>
+                            <div class="col-span-12 flex grid justify-items-end items-center">
+                                <div>
+                                    <button @click="marcarCompletadas" class="mt-4 px-4 py-2 bg-green-600 text-white rounded">
+                                        Guardar progreso
+                                    </button>
+                                </div>
+                                
+                            </div>
+                            
                         </div>
 
                         <!-- MODAL -->
@@ -338,14 +468,14 @@ const eliminarActividad = async () => {
                             <!-- <p>{{  selectedItem.id  }}</p> -->
                             <!-- <button @click="" class="px-4 py-2 bg-blue-500 text-white rounded mr-10">Cancelar</button> -->
                             <div class="flex justify-between items-center">
-                                <button @click="showModal = false" class="px-4 py-2 bg-blue-500 text-white rounded mr-10">Cancelar</button>
-                                <button @click="eliminarActividad" class="px-4 py-2 bg-blue-500 text-white rounded">Aceptar</button>
+                                <button @click="showModal = false" class="px-4 py-2 bg-gray-500 text-white rounded mr-10">Cancelar</button>
+                                <button @click="eliminarActividad" class="px-4 py-2 bg-green-600 text-white rounded">Aceptar</button>
                             </div>
                         </Modal>
                     </div>
 
                     <!-- Sección de Agregar Actividades -->
-                    <div class="col-span-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow space-y-4">
+                    <div class="col-span-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow space-y-4">
                         <div>
                             <h3 class="font-bold text-purple-600">Agregar actividad</h3>
                             <div class="space-y-2">
@@ -381,7 +511,7 @@ const eliminarActividad = async () => {
                     </div>
 
                     <!-- Sección de Distribución de Tiempo -->
-                    <div class="col-span-4 bg-purple-100 p-4 rounded-lg shadow">
+                    <!-- <div class="col-span-4 bg-purple-100 p-4 rounded-lg shadow">
                         <h3 class="font-bold text-purple-600 text-lg flex items-center">
                             ✅ DISTRIBUCIÓN DE TIEMPO
                         </h3>
@@ -405,7 +535,7 @@ const eliminarActividad = async () => {
                                 <div class="mt-2 p-2 border rounded">14:00 a 13:00 🗑</div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
                 </div>
             </div>
