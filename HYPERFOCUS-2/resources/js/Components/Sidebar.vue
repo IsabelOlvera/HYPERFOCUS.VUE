@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 
 const currentRoute = usePage().url;
-const isSidebarOpen = ref(true); // Estado para mostrar/ocultar sidebar
+const isSidebarOpen = ref(true);
 
 const toggleSidebar = () => {
     isSidebarOpen.value = !isSidebarOpen.value;
@@ -38,7 +38,9 @@ const menuItems = [
                 <div 
                     v-for="item in menuItems" 
                     :key="item.route" 
-                    :class="currentRoute === item.route ? 'bg-purple-500 text-white font-bold' : 'text-white'"
+                    :class="currentRoute === item.route 
+                        ? 'bg-purple-500 text-white font-bold' 
+                        : 'text-purple-800 hover:bg-purple-300 hover:text-purple-900'"
                     class="flex items-center space-x-2 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200"
                     @click="$inertia.visit(item.route)"
                 >
