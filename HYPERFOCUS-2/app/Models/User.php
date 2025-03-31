@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Practica;
 
 class User extends Authenticatable
 {
@@ -33,4 +34,11 @@ class User extends Authenticatable
         'email' => 'string',
         'estatus' => 'boolean',
     ];
+
+
+    public function practicas()
+{
+    return $this->hasMany(Practica::class);
+}
+
 }
