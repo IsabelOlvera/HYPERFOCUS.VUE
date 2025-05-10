@@ -6,111 +6,69 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
-    public function vistaHome(){
-        // Usuario (falta consulta)
-        $us = 2;
-        
-        //Obtención fecha con formato
+    public function vistaHome()
+    {
+        $usuario = Auth::user(); // Usuario autenticado
+
+        // Fechas
         $fechaconsulta = Carbon::now()->format('y/m/d');
         $fechaHoy = Carbon::now()->format('d/m/y');
-
-        //Obtención de nombre del día
         $nombreDia = Carbon::now()->locale('es')->dayName;
-
-        //Obtencion de fechas para semana
         $inicioS = Carbon::now()->startOfWeek()->format('y/m/d');
         $finS = Carbon::now()->endOfWeek()->format('y/m/d');
         $finS2 = Carbon::now()->yesterday()->format('y/m/d');
 
-        // Consulta de la informacion para llenar la vista home
-        $consultaUSER = DB::table('users')
-            ->select('name')
-            ->where('id', '=', $us)
-            ->get();
-
-
+        // Consulta de actividades del día
         $consultaA = DB::table('actividades')
-            ->join('users', 'actividades.user_id', '=', 'users.id')
-            ->select( 'actividades.nombre', 'actividades.completada', 'actividades.id')
-            ->where('user_id', '=', $us)
-            ->where('fecha_inicio','=', $fechaconsulta)
+            ->select('id', 'nombre', 'completada')
+            ->where('user_id', $usuario->id)
+            ->where('fecha_inicio', $fechaconsulta)
             ->get();
 
-        // Numero de actividades segun la cosulta
-        $totalActD = count($consultaA);
+        // Total actividades del día
+        $totalActD = $consultaA->count();
 
-        //Numero de actividades a la semana 
+        // Consulta de actividades de la semana
         $consultaActS = DB::table('actividades')
             ->whereBetween('fecha_inicio', [$inicioS, $finS])
-            ->where('user_id','=', $us)
+            ->where('user_id', $usuario->id)
             ->get();
+        $totalActS = $consultaActS->count() ?: 1;
 
-            if ($consultaActS->isEmpty()) {
-                $totalActS = 1;
-            }else{
-                $totalActS = count($consultaActS);
-            }
-
-        
-        
-
-        // Numero de actividades realizadas
+        // Actividades completadas en la semana
         $consultaActRS = DB::table('actividades')
             ->whereBetween('fecha_inicio', [$inicioS, $finS2])
-            ->where('user_id','=', $us)
-            ->where('completada','=', '1')
+            ->where('user_id', $usuario->id)
+            ->where('completada', 1)
             ->get();
+        $totalActRS = $consultaActRS->count() ?: 1;
 
-            if ($consultaActRS->isEmpty() AND $consultaActS->isEmpty()) {
-                $totalActRS = 1;
-            }else{
-                $totalActRS = count($consultaActRS);
-            }
-        
-        
-
-            return Inertia::render('Home', [
-                'totalActD' => $totalActD,
-                'consultaA' => $consultaA,
-                'consultaUSER' => $consultaUSER,
-                'totalActS' => $totalActS,
-                'totalActRS' => $totalActRS,
-                'fechaHoy' => $fechaHoy,
-                'nombreDia' => $nombreDia
-            ]);
+        return Inertia::render('Home', [
+            'usuario' => $usuario, // Enviar el usuario autenticado a la vista
+            'consultaA' => $consultaA,
+            'totalActD' => $totalActD,
+            'totalActS' => $totalActS,
+            'totalActRS' => $totalActRS,
+            'fechaHoy' => $fechaHoy,
+            'nombreDia' => $nombreDia,
+        ]);
     }
 
+    public function guardarProgreso(Request $request)
+    {
+        $usuario = Auth::user();
 
-
-
-    
-    public function guardarProgreso( Request  $request){
-        //Obtencion de las actividades realizadas/no realizadas
-        $valores = $request->all();
-        // $validacion = [];
-
-        foreach ($valores as $nombre => $valor) {
-            if ($valor == 1) {
-                DB::table('actividades')
-                    ->where('id', $nombre)
-                    ->update(['completada' => 1]);
-
-                // array_push($validacion, $nombre.' 1');
-            }elseif ($valor == 0) {
-                DB::table('actividades')
-                    ->where('id', $nombre)
-                    ->update(['completada' => 0]);
-
-                // array_push($validacion, $nombre.' 0');
-            }
+        foreach ($request->all() as $actividadId => $completada) {
+            DB::table('actividades')
+                ->where('id', $actividadId)
+                ->where('user_id', $usuario->id) // Asegurar que la actividad pertenece al usuario
+                ->update(['completada' => $completada]);
         }
-        
-        
-        session()->flash('progresoGC');
 
-        return redirect()->route('rutahome');
+        return redirect()->back()->with('success', 'Progreso guardado correctamente');
     }
 }
