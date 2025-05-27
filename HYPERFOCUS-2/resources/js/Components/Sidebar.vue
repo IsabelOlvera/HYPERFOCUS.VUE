@@ -15,6 +15,7 @@ const menuItems = [
     { name: 'Concentración', icon: '⏳', route: '/focus' },
     { name: 'Memoria', icon: '🧩', route: '/memory' },
     { name: 'Mis logros', icon: '🏅', route: '/achievements' },
+    { name: 'Centro de ayuda', icon: '❓', route: '/suport' },
 ];
 </script>
 
