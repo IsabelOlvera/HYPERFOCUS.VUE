@@ -45,8 +45,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 
-/*Route::middleware(['auth'])->group(function () {
-    Route::get('/usuarios', [UsuariosController::class, 'index'])->name('usuarios');
-});*/
+
 
 

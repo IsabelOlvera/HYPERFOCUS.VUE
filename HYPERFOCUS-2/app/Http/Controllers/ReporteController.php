@@ -29,7 +29,7 @@ public function index(Request $request)
     $reportes = $query->latest()->paginate(10)->withQueryString();
     $estatusDisponibles = EstatusReporte::all();
 
-    return Inertia::render('Admin/Reportes/Index', [
+    return Inertia::render('CentroAyuda', [
         'reportes' => $reportes,
         'filtros' => $request->only('estatus_reportes_id', 'usuario_id'),
         'estatus_reportes' => $estatusDisponibles,
@@ -72,8 +72,7 @@ public function index(Request $request)
         'fecha_solucion' => now()->addDays(5), // Fecha actual + 5 días
         'estatus_reportes_id' => 1, // ID por defecto (ej. "Pendiente")
         'estatus_reportes_id' => 1, // ID por defecto o dinámico
-        'usuario_id' => auth()->id(),
-        'asignado_a_id' => auth()->id(), // o asignación dinámica
+        'usuario_id' => auth()->id(), // o asignación dinámica
     ]);
 
     return redirect()->route('centro-ayuda')->with('success', 'Sugerencia enviada correctamente');
@@ -165,7 +164,8 @@ public function agregarSolucion(Request $request, Reporte $reporte)
 
     $reporte->update([
         'solucion' => $request->solucion,
-        'estatus_reportes_id' => 3 // Asume que 3 es el ID para "Finalizado"
+        'estatus_reportes_id' => 3, 
+        'asignado_a_id' => Auth::id(), 
     ]);
 
     return back()->with('success', 'Solución agregada correctamente');
