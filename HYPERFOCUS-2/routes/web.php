@@ -26,6 +26,10 @@ Route::get('/memory', [MemoryController::class, 'index'])->name('memory');
 use App\Http\Controllers\AchievementsController;
 Route::get('/achievements', [AchievementsController::class, 'index'])->name('achievements');
 
+Route::get('/suport', function () {
+    return Inertia::render('Suport');
+})->name('suport');
+
 // Ruta para la página de Planes
 Route::get('/planes', function () {
     return Inertia::render('Planes');
