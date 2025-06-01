@@ -102,7 +102,31 @@ const actualizarEstatus = (reporte) => {
   });
 }
 
-
+const verArchivo = (archivoPath) => {
+  if (!archivoPath) return;
+  
+  // Construye la URL completa al archivo en storage
+  const url = `/storage/${archivoPath}`;
+  
+  // Verifica el tipo de archivo para decidir cómo mostrarlo
+  const extension = archivoPath.split('.').pop().toLowerCase();
+  
+  if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+    // Si es imagen, abre en una nueva pestaña
+    window.open(url, '_blank');
+  } else if (['pdf'].includes(extension)) {
+    // PDF también en nueva pestaña
+    window.open(url, '_blank');
+  } else {
+    // Para otros tipos (como docx), fuerza la descarga
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', '');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+};
 
 </script>
 
@@ -238,6 +262,9 @@ const actualizarEstatus = (reporte) => {
                           Información
                         </th>
                         <th class="px-3 py-3 lg:px-6 lg:py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
+                          Detalles
+                        </th>
+                        <th class="px-3 py-3 lg:px-6 lg:py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
                           Atendido por
                         </th>
                         <th class="px-3 py-3 lg:px-6 lg:py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
@@ -286,8 +313,19 @@ const actualizarEstatus = (reporte) => {
 
     <!-- Información (Descripción del reporte) -->
     <td class="px-3 py-3 lg:px-6 lg:py-4 text-xs lg:text-sm text-gray-500 dark:text-gray-400">
-      <div class="max-w-xs truncate">{{ reporte.descripcion }}</div>
+      <div class="max-w-xs truncate">{{ reporte.titulo }}</div>
     </td>
+
+    <td class="px-3 py-3 lg:px-6 lg:py-4 text-xs lg:text-sm text-gray-500 dark:text-gray-400 max-w-xs">
+    <div 
+      class="whitespace-normal break-words" 
+      :title="reporte.descripcion" 
+      v-if="reporte.descripcion"
+    >
+      {{ reporte.descripcion }}
+    </div>
+    <span v-else class="text-gray-400 italic">Sin detalles</span>
+  </td>
 
     <!-- Atendido por -->
     <td class="px-3 py-3 lg:px-6 lg:py-4 whitespace-nowrap">
@@ -305,8 +343,8 @@ const actualizarEstatus = (reporte) => {
 
     <!-- Fecha -->
     <td class="px-3 py-3 lg:px-6 lg:py-4 text-xs lg:text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
-      {{ new Date(reporte.fecha_generacion).toLocaleDateString() }}
-    </td>
+  {{ new Date(reporte.fecha_generacion).toLocaleString('es-MX') }}
+</td>
 
     <!-- Correo del usuario -->
     <td class="px-3 py-3 lg:px-6 lg:py-4 whitespace-nowrap">
@@ -324,8 +362,12 @@ const actualizarEstatus = (reporte) => {
 
     <!-- Fecha Límite (si no existe, puedes usar otra lógica o dejarlo vacío) -->
     <td class="px-3 py-3 lg:px-6 lg:py-4 text-xs lg:text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
-      {{ reporte.fecha_limite ? new Date(reporte.fecha_limite).toLocaleDateString() : 'No definida' }}
-    </td>
+  {{ 
+    reporte.fecha_solucion 
+      ? new Date(reporte.fecha_solucion).toLocaleString('es-MX') 
+      : 'No definida' 
+  }}
+</td>
 
     <!-- Status -->
     <td class="py-3 px-4 whitespace-nowrap">
@@ -351,13 +393,17 @@ const actualizarEstatus = (reporte) => {
             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
           </svg>
         </button>
-        <button class="bg-green-500 hover:bg-green-600 text-white p-1.5 lg:p-2 rounded-lg transition">
-          <!-- View icon -->
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
-          </svg>
-        </button>
+        <button 
+  @click="verArchivo(reporte.archivo_adjunto)"
+  class="bg-green-500 hover:bg-green-600 text-white p-1.5 lg:p-2 rounded-lg transition"
+  :disabled="!reporte.archivo_adjunto"
+  :title="reporte.archivo_adjunto ? 'Ver archivo adjunto' : 'No hay archivo'"
+>
+  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+  </svg>
+</button>
         <button class="bg-red-500 hover:bg-red-600 text-white p-1.5 lg:p-2 rounded-lg transition">
           <!-- Delete icon -->
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">

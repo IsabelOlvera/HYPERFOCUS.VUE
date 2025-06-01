@@ -53,6 +53,8 @@ class ReporteController extends Controller
         'descripcion' => $request->descripcion,
         'archivo_adjunto' => $archivoPath,
         'fecha_generacion' => now(),
+        'fecha_solucion' => now()->addDays(5), // Fecha actual + 5 días
+        'estatus_reportes_id' => 1, // ID por defecto (ej. "Pendiente")
         'estatus_reportes_id' => 1, // ID por defecto o dinámico
         'usuario_id' => auth()->id(),
         'asignado_a_id' => auth()->id(), // o asignación dinámica
@@ -126,6 +128,5 @@ public function actualizarEstatus(Request $request, Reporte $reporte)
 
     return back()->with('success', 'Estatus actualizado.');
 }
-
 
 }
