@@ -16,6 +16,7 @@ class Reporte extends Model
     'estatus_reportes_id',
     'usuario_id',
     'asignado_a_id',
+    'solucion'
 ];
 
 public function usuario() {

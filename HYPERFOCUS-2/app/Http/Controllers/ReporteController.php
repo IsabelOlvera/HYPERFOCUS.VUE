@@ -97,11 +97,17 @@ class ReporteController extends Controller
 
 public function adminIndex()
 {
-    $reportes = Reporte::with(['usuario', 'asignadoA', 'estatus'])->latest()->get();
+$reportes = Reporte::with(['usuario', 'asignadoA', 'estatus'])
+        ->get()
+        ->map(function ($reporte) {
+            return [
+                ...$reporte->toArray(),
+                'solucion' => $reporte->solucion ?? null, // Asegura que siempre exista
+            ];
+        });
     
     $estatusDisponibles = EstatusReporte::all();
 
-    // Totales usando nombres consistentes
     $estadisticas = [
         'total' => $reportes->count(),
         'pendientes' => $reportes->where('estatus.nombre', 'Pendiente')->count(),
@@ -115,6 +121,20 @@ public function adminIndex()
         'estadisticas' => $estadisticas,
         'estatus_reportes' => $estatusDisponibles
     ]);
+}
+
+public function agregarSolucion(Request $request, Reporte $reporte)
+{
+    $request->validate([
+        'solucion' => 'required|string|max:1000'
+    ]);
+
+    $reporte->update([
+        'solucion' => $request->solucion,
+        'estatus_reportes_id' => 3 // Asume que 3 es el ID para "Finalizado"
+    ]);
+
+    return back()->with('success', 'Solución agregada correctamente');
 }
 
 public function actualizarEstatus(Request $request, Reporte $reporte)

@@ -39,7 +39,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/reportes', [ReporteController::class, 'adminIndex'])->name('admin.reportes');
         Route::put('reportes/{reporte}/actualizar-estatus', [ReporteController::class, 'actualizarEstatus'])
          ->name('reportes.actualizar-estatus');
+
+    Route::put('/reportes/{reporte}/solucion', [ReporteController::class, 'agregarSolucion'])
+    ->name('reportes.agregar-solucion');
 });
+
 
 /*Route::middleware(['auth'])->group(function () {
     Route::get('/usuarios', [UsuariosController::class, 'index'])->name('usuarios');
