@@ -1,0 +1,131 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Reporte;
+use App\Models\EstatusReporte; // Agrega esto
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
+
+
+class ReporteController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        return Inertia::render('CentroAyuda', [
+            'auth' => [
+                'user' => Auth::user(),
+            ],
+        ]);
+    }
+
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+{
+    $request->validate([
+        'titulo' => 'required|string|max:255',
+        'descripcion' => 'required|string',
+        'archivo' => 'nullable|file|mimes:jpg,png,pdf,docx|max:2048',
+    ]);
+
+    $archivoPath = null;
+    if ($request->hasFile('archivo')) {
+        $archivoPath = $request->file('archivo')->store('archivos', 'public');
+    }
+
+    Reporte::create([
+        'titulo' => $request->titulo,
+        'descripcion' => $request->descripcion,
+        'archivo_adjunto' => $archivoPath,
+        'fecha_generacion' => now(),
+        'estatus_reportes_id' => 1, // ID por defecto o dinámico
+        'usuario_id' => auth()->id(),
+        'asignado_a_id' => auth()->id(), // o asignación dinámica
+    ]);
+
+    return redirect()->route('centro-ayuda')->with('success', 'Sugerencia enviada correctamente');
+}
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Reporte $reporte)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Reporte $reporte)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Reporte $reporte)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Reporte $reporte)
+    {
+        //
+    }
+
+public function adminIndex()
+{
+    $reportes = Reporte::with(['usuario', 'asignadoA', 'estatus'])->latest()->get();
+    
+    $estatusDisponibles = EstatusReporte::all();
+
+    // Totales usando nombres consistentes
+    $estadisticas = [
+        'total' => $reportes->count(),
+        'pendientes' => $reportes->where('estatus.nombre', 'Pendiente')->count(),
+        'en_proceso' => $reportes->where('estatus.nombre', 'En proceso')->count(),
+        'finalizados' => $reportes->where('estatus.nombre', 'Finalizado')->count(),
+        'usuarios' => $reportes->pluck('usuario_id')->unique()->count()
+    ];
+
+    return Inertia::render('Admin/reportes', [
+        'reportes' => $reportes,
+        'estadisticas' => $estadisticas,
+        'estatus_reportes' => $estatusDisponibles
+    ]);
+}
+
+public function actualizarEstatus(Request $request, Reporte $reporte)
+{
+    $request->validate([
+        'estatus_reportes_id' => 'required|exists:estatus_reportes,id'
+    ]);
+
+    $reporte->update(['estatus_reportes_id' => $request->estatus_reportes_id]);
+    $reporte->save();
+
+    return back()->with('success', 'Estatus actualizado.');
+}
+
+
+}
