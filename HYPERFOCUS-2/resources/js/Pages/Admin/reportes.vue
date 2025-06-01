@@ -10,7 +10,8 @@ import { router } from '@inertiajs/vue3'
 const props = defineProps({
     reportes: { type: Array, required: true, default: () => [] },
     estadisticas: { type: Object, required: true },
-    estatus_reportes: { type: Array, required: true }
+    estatus_reportes: { type: Array, required: true },
+    filtros: { type: Object, required: false, default: () => ({}) },
 })
 
 // --- Estados ---
@@ -101,6 +102,21 @@ const getStatusText = (status) => ({
     'en_proceso': 'En proceso',
     'finalizado': 'Finalizado'
 })[status] || status
+
+const estatus_reportes_id = ref(props.filtros.estatus_reportes_id || '')
+const usuario_nombre = ref(props.filtros?.usuario_nombre || '')
+
+
+function aplicarFiltros() {
+  router.get('/admin/reportes', {
+    estatus_reportes_id: estatus_reportes_id.value,
+    usuario_nombre: usuario_nombre.value,
+  }, {
+    preserveState: true,
+    preserveScroll: true,
+  })
+}
+
 </script>
 
 <template>
@@ -188,27 +204,52 @@ const getStatusText = (status) => ({
           </div>
           
           <!-- Filtros -->
+        
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 lg:p-6 mb-6">
             <div class="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
+              
               <div class="flex flex-col sm:flex-row gap-3 flex-1 lg:flex-none">
+
+                <!-- Input de usuario_id -->
                 <input 
                   type="text" 
-                  placeholder="Buscar usuario..." 
+                  v-model="usuario_nombre"
+                  placeholder="Buscar por ID de usuario..." 
                   class="px-3 py-2 lg:px-4 lg:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm lg:text-base flex-1 lg:w-64"
                 />
-                <select class="px-3 py-2 lg:px-4 lg:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm lg:text-base flex-1 lg:w-48">
+
+                <!-- Select de estatus -->
+                <select 
+                  v-model="estatus_reportes_id" 
+                  class="px-3 py-2 lg:px-4 lg:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm lg:text-base flex-1 lg:w-48"
+                >
                   <option value="">Todos los estados</option>
-                  <option value="pendiente">Pendiente</option>
-                  <option value="en_progreso">En Progreso</option>
-                  <option value="completado">Completado</option>
+                  <option 
+                    v-for="estatus in estatus_reportes" 
+                    :key="estatus.id" 
+                    :value="estatus.id"
+                  >
+                    {{ estatus.nombre }}
+                  </option>
                 </select>
+
               </div>
-              <button class="bg-gradient-to-r from-purple-500 to-blue-600 text-white px-4 py-2 lg:px-6 lg:py-2 rounded-lg hover:from-purple-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl text-sm lg:text-base whitespace-nowrap flex-shrink-0">
+
+
+              <!--<button class="bg-gradient-to-r from-purple-500 to-blue-600 text-white px-4 py-2 lg:px-6 lg:py-2 rounded-lg hover:from-purple-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl text-sm lg:text-base whitespace-nowrap flex-shrink-0">
                 <svg class="w-4 h-4 lg:w-5 lg:h-5 inline-block mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
                 </svg>
                 Nuevo Usuario
+              </button>-->
+
+              <button 
+                @click="aplicarFiltros" 
+                class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+              >
+                Aplicar filtros
               </button>
+
             </div>
           </div>
           

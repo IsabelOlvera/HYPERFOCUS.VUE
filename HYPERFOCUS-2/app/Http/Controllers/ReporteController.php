@@ -14,14 +14,30 @@ class ReporteController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        return Inertia::render('CentroAyuda', [
-            'auth' => [
-                'user' => Auth::user(),
-            ],
-        ]);
+public function index(Request $request)
+{
+    $query = Reporte::with(['estatus']); // Asegura la relación para mostrar el nombre del estatus
+
+    if ($request->filled('estatus_reportes_id')) {
+        $query->where('estatus_reportes_id', $request->estatus_reportes_id);
     }
+
+    if ($request->filled('usuario_id')) {
+        $query->where('usuario_id', $request->usuario_id);
+    }
+
+    $reportes = $query->latest()->paginate(10)->withQueryString();
+    $estatusDisponibles = EstatusReporte::all();
+
+    return Inertia::render('Admin/Reportes/Index', [
+        'reportes' => $reportes,
+        'filtros' => $request->only('estatus_reportes_id', 'usuario_id'),
+        'estatus_reportes' => $estatusDisponibles,
+    ]);
+}
+
+
+
 
 
     /**
@@ -95,19 +111,35 @@ class ReporteController extends Controller
         //
     }
 
-public function adminIndex()
+public function adminIndex(Request $request)
 {
-$reportes = Reporte::with(['usuario', 'asignadoA', 'estatus'])
-        ->get()
-        ->map(function ($reporte) {
-            return [
-                ...$reporte->toArray(),
-                'solucion' => $reporte->solucion ?? null, // Asegura que siempre exista
-            ];
-        });
-    
+    $query = Reporte::with(['usuario', 'asignadoA', 'estatus']);
+
+    // ✅ Filtro por estatus (estatus_reportes_id)
+    if ($request->filled('estatus_reportes_id')) {
+        $query->where('estatus_reportes_id', $request->estatus_reportes_id);
+    }
+
+    // ✅ Filtro por usuario
+    if ($request->filled('usuario_nombre')) {
+            $query->whereHas('usuario', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->usuario_nombre . '%');
+            });
+        }
+
+
+    // 🔍 Obtener los reportes filtrados
+    $reportes = $query->get()->map(function ($reporte) {
+        return [
+            ...$reporte->toArray(),
+            'solucion' => $reporte->solucion ?? null,
+        ];
+    });
+
+    // 📊 Cargar estatus disponibles para el <select>
     $estatusDisponibles = EstatusReporte::all();
 
+    // 📈 Calcular estadísticas con base en los reportes filtrados
     $estadisticas = [
         'total' => $reportes->count(),
         'pendientes' => $reportes->where('estatus.nombre', 'Pendiente')->count(),
@@ -116,10 +148,12 @@ $reportes = Reporte::with(['usuario', 'asignadoA', 'estatus'])
         'usuarios' => $reportes->pluck('usuario_id')->unique()->count()
     ];
 
+    // 📦 Retornar los datos a la vista con filtros actuales
     return Inertia::render('Admin/reportes', [
         'reportes' => $reportes,
         'estadisticas' => $estadisticas,
-        'estatus_reportes' => $estatusDisponibles
+        'estatus_reportes' => $estatusDisponibles,
+        'filtros' => $request->only('estatus_reportes_id', 'usuario_id'), // importante para mantener estado
     ]);
 }
 
