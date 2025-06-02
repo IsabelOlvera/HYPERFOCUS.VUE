@@ -18,7 +18,7 @@ import Sidebar from '@/Components/Sidebar.vue'
         </section>
 
         <!-- Sección principal -->
-        <main class="container mx-auto py-10 px-6 max-w-6xl">
+        <main class="container mx-auto py-10 px-6 max-w-6xl bg-white">
           <!-- Ayuda -->
           <h2 class="text-2xl font-bold text-center mb-8">¿En qué necesitas ayuda?</h2>
 
