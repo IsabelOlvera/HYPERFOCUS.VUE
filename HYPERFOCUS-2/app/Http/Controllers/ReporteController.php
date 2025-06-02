@@ -29,7 +29,8 @@ public function index(Request $request)
     $reportes = $query->latest()->paginate(10)->withQueryString();
 
     // También puedes enviar todos los títulos (limitar a 10 si lo deseas)
-    $titulos = Reporte::latest()->get(['id', 'titulo']);
+    $titulos = Reporte::latest()->get(['id', 'titulo', 'descripcion', 'solucion']);
+
 
 
     $estatusDisponibles = EstatusReporte::all();

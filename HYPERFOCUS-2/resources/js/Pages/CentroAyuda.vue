@@ -10,6 +10,8 @@ const descripcion = ref('')
 const archivo = ref(null)
 const mostrarModal = ref(false)
 const mensajeModal = ref('')
+const modalAbierto = ref(false);
+const reporteSeleccionado = ref(null);
 
 
 function handleFileUpload(event) {
@@ -43,6 +45,11 @@ function votar(id) {
       mostrarModal.value = true
     }
   })
+}
+
+function abrirModal(reporte) {
+  reporteSeleccionado.value = reporte;
+  modalAbierto.value = true;
 }
 
 
@@ -126,19 +133,23 @@ function votar(id) {
       <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
         <span class="text-2xl">👤</span> {{ reporte.titulo }}
       </h4>
-      <p class="text-gray-700 dark:text-gray-300 text-sm">
+      <!--<p class="text-gray-700 dark:text-gray-300 text-sm">
         {{ reporte.descripcion }}
-      </p>
+      </p>-->
     </div>
 
-    <div class="mt-4 flex justify-end">
-      <button
-        class="bg-purple-600 text-white font-semibold px-4 py-2 rounded hover:bg-purple-700 transition"
-        @click="votar(reporte.id)"
-      >
-        ⭐ Votar
-      </button>
-    </div>
+    <div class="mt-4 flex justify-between items-center">
+  <button
+    class="bg-purple-600 text-white font-semibold px-4 py-2 rounded hover:bg-purple-700 transition"
+    @click="votar(reporte.id)"
+  >
+    ⭐ Votar
+  </button>
+  <button @click="abrirModal(reporte)" class="ml-4 text-sm text-gray-600 hover:underline dark:text-gray-300">
+    Ver detalle
+  </button>
+</div>
+
   </div>
 </div>
 
@@ -161,5 +172,26 @@ function votar(id) {
     </button>
   </div>
 </div>
+
+<teleport to="body">
+  <div v-if="modalAbierto" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-xl max-w-md w-full">
+      <h2 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">
+        {{ reporteSeleccionado?.titulo }}
+      </h2>
+      <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">
+        {{ reporteSeleccionado?.descripcion }}
+      </p>
+      <p v-if="reporteSeleccionado?.solucion" class="text-sm text-green-600 dark:text-green-300 mt-2">
+        <strong>Solución:</strong> {{ reporteSeleccionado.solucion }}
+      </p>
+      <div class="mt-4 text-right">
+        <button @click="modalAbierto = false" class="bg-gray-300 dark:bg-gray-700 px-4 py-2 rounded hover:bg-gray-400 dark:hover:bg-gray-600">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</teleport>
 
 </template>
