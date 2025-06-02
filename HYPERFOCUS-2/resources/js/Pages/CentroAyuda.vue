@@ -52,6 +52,19 @@ function abrirModal(reporte) {
   modalAbierto.value = true;
 }
 
+function claseContornoPorEstatus(estatusId) {
+  switch (estatusId) {
+    case 1:
+      return 'border-2 border-red-400'; // Pendiente
+    case 2:
+      return 'border-2 border-blue-400';   // En proceso
+    case 3:
+      return 'border-2 border-green-500';  // Finalizado
+    default:
+      return 'border border-gray-300';
+  }
+}
+
 
 </script>
 
@@ -125,10 +138,14 @@ function abrirModal(reporte) {
           <!-- Sección de sugerencias frecuentes -->
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
   <div
-    v-for="reporte in titulos"
-    :key="reporte.id"
-    class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 flex flex-col justify-between transition hover:shadow-lg"
-  >
+  v-for="reporte in titulos"
+  :key="reporte.id"
+  :class="[
+    'bg-white dark:bg-gray-800 rounded-xl shadow p-4 flex flex-col justify-between transition hover:shadow-lg',
+    claseContornoPorEstatus(reporte.estatus_reportes_id)
+  ]"
+>
+
     <div>
       <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
         <span class="text-2xl">👤</span> {{ reporte.titulo }}
@@ -176,22 +193,50 @@ function abrirModal(reporte) {
 <teleport to="body">
   <div v-if="modalAbierto" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
     <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-xl max-w-md w-full">
+      
+      <!-- Título -->
       <h2 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">
         {{ reporteSeleccionado?.titulo }}
       </h2>
+
+      
+
+      <!-- Descripción -->
       <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">
         {{ reporteSeleccionado?.descripcion }}
       </p>
+
+      <!-- Solución (si existe) -->
       <p v-if="reporteSeleccionado?.solucion" class="text-sm text-green-600 dark:text-green-300 mt-2">
         <strong>Solución:</strong> {{ reporteSeleccionado.solucion }}
       </p>
+
+      <!-- Estatus con badge de color -->
+      <p v-if="reporteSeleccionado?.estatus" class="mb-2">
+        <span
+          class="inline-block px-3 py-1 rounded-full text-sm font-semibold"
+          :class="{
+            'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': reporteSeleccionado.estatus.id === 1,
+            'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200': reporteSeleccionado.estatus.id === 2,
+            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': reporteSeleccionado.estatus.id === 3
+          }"
+        >
+          {{ reporteSeleccionado.estatus.nombre }}
+        </span>
+      </p>
+
+      <!-- Botón de cerrar -->
       <div class="mt-4 text-right">
-        <button @click="modalAbierto = false" class="bg-gray-300 dark:bg-gray-700 px-4 py-2 rounded hover:bg-gray-400 dark:hover:bg-gray-600">
+        <button
+          @click="modalAbierto = false"
+          class="bg-gray-300 dark:bg-gray-700 px-4 py-2 rounded hover:bg-gray-400 dark:hover:bg-gray-600"
+        >
           Cerrar
         </button>
       </div>
     </div>
   </div>
 </teleport>
+
 
 </template>
