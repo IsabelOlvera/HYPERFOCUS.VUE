@@ -6,12 +6,14 @@ import { Head } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 
+
 // --- Props ---
 const props = defineProps({
     reportes: { type: Array, required: true, default: () => [] },
     estadisticas: { type: Object, required: true },
     estatus_reportes: { type: Array, required: true },
     filtros: { type: Object, required: false, default: () => ({}) },
+    visible: Boolean,
 })
 
 // --- Estados ---
@@ -20,6 +22,9 @@ const archivoActual = ref('')
 const solucionModal = ref(false)
 const reporteActual = ref(null)
 const solucionTexto = ref('')
+const emit = defineEmits(['cancelar', 'confirmar'])
+const mostrarModalEliminar = ref(false)
+const idReporteAEliminar = ref(null)
 
 // --- Computed ---
 const estatusDisponibles = computed(() => props.estatus_reportes)
@@ -114,6 +119,56 @@ function aplicarFiltros() {
   }, {
     preserveState: true,
     preserveScroll: true,
+  })
+}
+
+const eliminarReporte = (reporte) => {
+  if (confirm(`¿Estás seguro de eliminar el reporte #${reporte.id}? Esta acción no se puede deshacer.`)) {
+    router.delete(`/reportes/${reporte.id}`, {
+      preserveScroll: true,
+      onSuccess: () => {
+        alert('Reporte eliminado correctamente.')
+      },
+      onError: (error) => {
+        alert('Hubo un error al eliminar el reporte.')
+        console.error(error)
+      }
+    })
+  }
+}
+
+function cancelar() {
+  mostrarModalEliminar.value = false
+  idReporteAEliminar.value = null
+}
+
+function confirmar() {
+  if (!idReporteAEliminar.value) return
+
+  router.delete(route('reportes.destroy', idReporteAEliminar.value), {
+    preserveScroll: true,
+    onSuccess: () => {
+      mostrarModalEliminar.value = false
+      idReporteAEliminar.value = null
+    },
+    onError: () => {
+      alert('Hubo un error al eliminar el reporte.')
+    }
+  })
+}
+
+
+function pedirConfirmacionEliminar(id) {
+  idReporteAEliminar.value = id
+  mostrarModalEliminar.value = true
+}
+
+function confirmarEliminacion() {
+  router.delete(route('reportes.destroy', idReporteAEliminar.value), {
+    onSuccess: () => {
+      mostrarModalEliminar.value = false
+      idReporteAEliminar.value = null
+    },
   })
 }
 
@@ -282,6 +337,8 @@ function aplicarFiltros() {
                         <th class="px-3 py-3 lg:px-6 lg:py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Fecha Límite</th>
                         <!-- Columna: Estatus -->
                         <th class="px-3 py-3 lg:px-6 lg:py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Status</th>
+                        <!-- Columna: Votos totales-->
+                        <th class="px-3 py-3 lg:px-6 lg:py-4 text-left text-xs font-semibold uppercase tracking-wider">Votos</th>
                         <!-- Columna: Acciones -->
                         <th class="px-3 py-3 lg:px-6 lg:py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Acciones</th>
                       </tr>
@@ -382,20 +439,32 @@ function aplicarFiltros() {
                           </select>
                         </td>
 
+                        <!-- Celda: Total de votos -->
+                        <td class="px-3 py-3 lg:px-6 lg:py-4 whitespace-nowrap text-xs lg:text-sm text-center text-gray-700 dark:text-gray-200">
+                          <span class="inline-flex items-center px-2 py-1 bg-indigo-100 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-200 rounded-full">
+                            {{ reporte.total_votos > 0 ? reporte.total_votos : '0' }}
+                          </span>
+                        </td>
+
+
                         <!-- Celda: Acciones -->
                         <td class="px-3 py-3 lg:px-6 lg:py-4 whitespace-nowrap">
                           <div class="flex gap-1 lg:gap-2">
-                            <!-- Botón: Editar -->
+
+                            <!-- 
+                            ==========================================================================================
+                            Botón: Editar 
+                            ==========================================================================================
                             <button class="bg-blue-500 hover:bg-blue-600 text-white p-1.5 lg:p-2 rounded-lg transition">
                               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
                               </svg>
-                            </button>
+                            </button>-->
 
                             <!-- Botón: Agregar solución -->
                             <button 
                               @click="abrirModalSolucion(reporte)"
-                              class="bg-yellow-500 hover:bg-yellow-600 text-white p-1.5 lg:p-2 rounded-lg transition"
+                              class="bg-blue-500 hover:bg-blue-600 text-white p-1.5 lg:p-2 rounded-lg transition"
                               title="Agregar solución"
                             >
                               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -427,11 +496,18 @@ function aplicarFiltros() {
                             </button>
 
                             <!-- Botón: Eliminar -->
-                            <button class="bg-red-500 hover:bg-red-600 text-white p-1.5 lg:p-2 rounded-lg transition">
+                            <button
+                              v-if="reporte.estatus?.nombre === 'Finalizado'"
+                              @click="pedirConfirmacionEliminar(reporte.id)"
+                              class="bg-red-500 hover:bg-red-600 text-white p-1.5 lg:p-2 rounded-lg transition"
+                              title="Eliminar reporte"
+                            >
                               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
                               </svg>
                             </button>
+
+
                           </div>
                         </td>
                       </tr>
@@ -501,8 +577,8 @@ function aplicarFiltros() {
     <div v-if="solucionModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div class="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full">
         <div class="flex justify-between items-center p-4 border-b">
-          <h3 class="text-lg font-medium">Agregar Solución</h3>
-          <button @click="solucionModal = false" class="text-gray-500 hover:text-gray-700">
+          <h3 class="text-black font-medium">Agregar Solución</h3>
+          <button @click="solucionModal = false" class="text-gy-500 hover:text-gray-700">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
@@ -532,6 +608,38 @@ function aplicarFiltros() {
         </div>
       </div>
     </div>
+
+    <!-- Modal de eliminar solución-->
+     <div
+        v-if="mostrarModalEliminar"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      >
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-md">
+          <h2 class="text-lg lg:text-xl font-semibold text-gray-800 dark:text-white mb-4">
+            Confirmar eliminación
+          </h2>
+
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-6">
+            ¿Estás seguro de que deseas eliminar este reporte? Esta acción no se puede deshacer.
+          </p>
+
+          <div class="flex justify-end space-x-3">
+            <button
+              @click="cancelar"
+              class="px-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition"
+            >
+              Cancelar
+            </button>
+            <button
+              @click="confirmar"
+              class="px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700 transition"
+            >
+              Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+
   </AuthenticatedLayout>
 </template>
 

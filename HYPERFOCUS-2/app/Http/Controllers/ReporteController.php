@@ -16,7 +16,7 @@ class ReporteController extends Controller
      */
 public function index(Request $request)
 {
-    $query = Reporte::with(['estatus']); // Asegura la relación para mostrar el nombre del estatus
+    $query = Reporte::with(['estatus']);
 
     if ($request->filled('estatus_reportes_id')) {
         $query->where('estatus_reportes_id', $request->estatus_reportes_id);
@@ -27,14 +27,21 @@ public function index(Request $request)
     }
 
     $reportes = $query->latest()->paginate(10)->withQueryString();
+
+    // También puedes enviar todos los títulos (limitar a 10 si lo deseas)
+    $titulos = Reporte::latest()->get(['id', 'titulo']);
+
+
     $estatusDisponibles = EstatusReporte::all();
 
     return Inertia::render('CentroAyuda', [
         'reportes' => $reportes,
         'filtros' => $request->only('estatus_reportes_id', 'usuario_id'),
         'estatus_reportes' => $estatusDisponibles,
+        'titulos' => $titulos, // 👈 enviar solo los títulos
     ]);
 }
+
 
 
 
@@ -106,32 +113,42 @@ public function index(Request $request)
      * Remove the specified resource from storage.
      */
     public function destroy(Reporte $reporte)
-    {
-        //
-    }
+{
+    $reporte->delete();
+    return back()->with('success', 'Reporte eliminado correctamente.');
+}
 
 public function adminIndex(Request $request)
 {
-    $query = Reporte::with(['usuario', 'asignadoA', 'estatus']);
+    $query = Reporte::with(['usuario', 'asignadoA', 'estatus', 'votos']);
 
     // ✅ Filtro por estatus (estatus_reportes_id)
     if ($request->filled('estatus_reportes_id')) {
         $query->where('estatus_reportes_id', $request->estatus_reportes_id);
     }
 
-    // ✅ Filtro por usuario
+    // ✅ Filtro por nombre del usuario
     if ($request->filled('usuario_nombre')) {
-            $query->whereHas('usuario', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->usuario_nombre . '%');
-            });
-        }
-
+        $query->whereHas('usuario', function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->usuario_nombre . '%');
+        });
+    }
 
     // 🔍 Obtener los reportes filtrados
     $reportes = $query->get()->map(function ($reporte) {
         return [
-            ...$reporte->toArray(),
+            'id' => $reporte->id,
+            'titulo' => $reporte->titulo,
+            'descripcion' => $reporte->descripcion,
+            'archivo_adjunto' => $reporte->archivo_adjunto,
+            'fecha_generacion' => $reporte->fecha_generacion,
+            'fecha_solucion' => $reporte->fecha_solucion,
+            'estatus' => $reporte->estatus,
+            'estatus_reportes_id' => $reporte->estatus_reportes_id, // 👈 para v-model del select
+            'usuario' => $reporte->usuario,
+            'asignado_a' => $reporte->asignadoA,
             'solucion' => $reporte->solucion ?? null,
+            'total_votos' => $reporte->votos->count(), // 👈 total de votos
         ];
     });
 
@@ -144,7 +161,7 @@ public function adminIndex(Request $request)
         'pendientes' => $reportes->where('estatus.nombre', 'Pendiente')->count(),
         'en_proceso' => $reportes->where('estatus.nombre', 'En proceso')->count(),
         'finalizados' => $reportes->where('estatus.nombre', 'Finalizado')->count(),
-        'usuarios' => $reportes->pluck('usuario_id')->unique()->count()
+        'usuarios' => $reportes->pluck('usuario.id')->unique()->count(),
     ];
 
     // 📦 Retornar los datos a la vista con filtros actuales
@@ -152,9 +169,11 @@ public function adminIndex(Request $request)
         'reportes' => $reportes,
         'estadisticas' => $estadisticas,
         'estatus_reportes' => $estatusDisponibles,
-        'filtros' => $request->only('estatus_reportes_id', 'usuario_id'), // importante para mantener estado
+        'filtros' => $request->only('estatus_reportes_id', 'usuario_id', 'usuario_nombre'),
     ]);
 }
+
+
 
 public function agregarSolucion(Request $request, Reporte $reporte)
 {
@@ -183,4 +202,19 @@ public function actualizarEstatus(Request $request, Reporte $reporte)
     return back()->with('success', 'Estatus actualizado.');
 }
 
+public function votar(Request $request, $id)
+{
+    $reporte = Reporte::findOrFail($id);
+    $usuario = auth()->user();
+
+    // Usar 'user_id', no 'usuario_id'
+    if (!$reporte->votos()->where('user_id', $usuario->id)->exists()) {
+        $reporte->votos()->attach($usuario->id);
+    }
+
+    return back()->with('success', '¡Tu voto fue registrado!');
 }
+
+
+}
+

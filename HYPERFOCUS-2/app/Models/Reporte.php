@@ -31,4 +31,12 @@ public function estatus() {
     return $this->belongsTo(EstatusReporte::class, 'estatus_reportes_id');
 }
 
+// Reporte.php
+public function votos()
+{
+    return $this->belongsToMany(User::class, 'votos_reportes', 'reporte_id', 'user_id')->withTimestamps();
+}
+
+
+
 }

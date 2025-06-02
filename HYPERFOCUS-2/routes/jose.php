@@ -42,6 +42,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::put('/reportes/{reporte}/solucion', [ReporteController::class, 'agregarSolucion'])
     ->name('reportes.agregar-solucion');
+    Route::delete('/reportes/{reporte}', [ReporteController::class, 'destroy'])->name('reportes.destroy');
+    Route::post('/reportes/{id}/votar', [ReporteController::class, 'votar'])->name('reportes.votar');
+
 });
 
 

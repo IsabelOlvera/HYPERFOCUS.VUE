@@ -8,10 +8,18 @@ import { router } from '@inertiajs/vue3'
 const titulo = ref('')
 const descripcion = ref('')
 const archivo = ref(null)
+const mostrarModal = ref(false)
+const mensajeModal = ref('')
+
 
 function handleFileUpload(event) {
   archivo.value = event.target.files[0]
 }
+
+const props = defineProps({
+  titulos: Array,
+})
+
 
 function enviarSugerencia() {
   const formData = new FormData()
@@ -21,6 +29,22 @@ function enviarSugerencia() {
 
   router.post('/reportes', formData)
 }
+
+function votar(id) {
+  router.post(`/reportes/${id}/votar`, {}, {
+    onSuccess: (page) => {
+      // Puedes inspeccionar `page.props` si devuelves algo desde el backend
+      mensajeModal.value = '¡Tu voto fue registrado con éxito!'
+      mostrarModal.value = true
+    },
+    onError: (errors) => {
+      // Si usas validaciones puedes mostrar mensajes personalizados
+      mensajeModal.value = 'Ya has votado por esta propuesta'
+      mostrarModal.value = true
+    }
+  })
+}
+
 
 </script>
 
@@ -92,36 +116,50 @@ function enviarSugerencia() {
           <div class="h-2 bg-purple-500 rounded mb-8"></div>
 
           <!-- Sección de sugerencias frecuentes -->
-          <div>
-            <h3 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white text-center">
-              Sugerencias Frecuentes
-            </h3>
-            <div class="text-center font-semibold text-gray-600 dark:text-gray-400 mb-4">
-              Puedes votar
-            </div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+  <div
+    v-for="reporte in titulos"
+    :key="reporte.id"
+    class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 flex flex-col justify-between transition hover:shadow-lg"
+  >
+    <div>
+      <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+        <span class="text-2xl">👤</span> {{ reporte.titulo }}
+      </h4>
+      <p class="text-gray-700 dark:text-gray-300 text-sm">
+        {{ reporte.descripcion }}
+      </p>
+    </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div
-                v-for="i in 4"
-                :key="i"
-                class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex items-center justify-between"
-              >
-                <div class="flex items-center gap-2">
-                  <span class="text-2xl">👤</span>
-                  <p class="text-lg font-semibold text-gray-800 dark:text-white">
-                    “Lorem ipsum”
-                  </p>
-                </div>
-                <button
-                  class="flex items-center bg-black text-white px-4 py-2 rounded shadow hover:bg-gray-800 transition"
-                >
-                  <span class="mr-2">⭐</span> Votar
-                </button>
-              </div>
-            </div>
-          </div>
+    <div class="mt-4 flex justify-end">
+      <button
+        class="bg-purple-600 text-white font-semibold px-4 py-2 rounded hover:bg-purple-700 transition"
+        @click="votar(reporte.id)"
+      >
+        ⭐ Votar
+      </button>
+    </div>
+  </div>
+</div>
+
+
         </div>
       </div>
     </div>
   </AuthenticatedLayout>
+
+<!-- Modal -->
+<div v-if="mostrarModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+  <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 max-w-md w-full text-center">
+    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Notificación</h2>
+    <p class="text-gray-700 dark:text-gray-300 mb-6">{{ mensajeModal }}</p>
+    <button
+      class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition"
+      @click="mostrarModal = false"
+    >
+      Cerrar
+    </button>
+  </div>
+</div>
+
 </template>
