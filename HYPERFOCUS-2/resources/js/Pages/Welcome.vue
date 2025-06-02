@@ -51,6 +51,31 @@ import "swiper/css/autoplay";
       </div>
     </section>
 
+    <!-- Hyperfocus Section -->
+    <section class="container mx-auto my-10 px-8 md:px-5">
+      <div class="flex flex-col md:flex-row items-center gap-5">
+        <!-- Texto a la izquierda -->
+        <div class="md:w-1/3 text-center md:text-left">
+          <h2 class="text-4xl font-bold text-gray-800">¿Qué es Hyperfocus?</h2>
+          <p class="mt-4 text-lg text-gray-600">
+            Hyperfocus es una herramienta diseñada para mejorar tu productividad
+            utilizando técnicas científicamente probadas, como el método Pomodoro y la
+            gestión eficiente de tareas. ¡Organiza tu tiempo y maximiza tu rendimiento!
+          </p>
+        </div>
+        <!-- Imagen a la derecha -->
+        <div class="md:w-2/3 flex justify-center">
+          <img
+            src="/img/hyperfocus.png"
+            alt="Hyperfocus en acción"
+            class="w-[800px] h-[500px] object-cover rounded-lg shadow-lg"
+          />
+        </div>
+      </div>
+    </section>
+    <br>
+    <br>
+
     <!-- Content and Reviews Section -->
     <section class="container mx-auto my-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Content Section -->

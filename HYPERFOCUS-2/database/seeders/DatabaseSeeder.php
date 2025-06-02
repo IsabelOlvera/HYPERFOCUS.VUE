@@ -19,6 +19,10 @@ class DatabaseSeeder extends Seeder
             RolesSeeder::class,
             EstatusReportesSeeder::class, // Llamamos el seeder de roles
         ]);
+        
+        $this->call([
+            PrioridadesSeeder::class, // Llamamos el seeder de prioridades
+        ]); 
 
         User::factory()->create([
             'name' => 'Test User',

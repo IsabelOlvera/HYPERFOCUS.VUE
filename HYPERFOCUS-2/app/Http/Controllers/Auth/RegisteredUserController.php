@@ -47,6 +47,8 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
+        session()->flash('registro_exitoso', true);
+
         return redirect(route('dashboard', absolute: false));
     }
 }
