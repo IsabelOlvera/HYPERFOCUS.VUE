@@ -41,4 +41,10 @@ class User extends Authenticatable
     return $this->hasMany(Practica::class);
 }
 
+public function votos()
+{
+    return $this->belongsToMany(Reporte::class, 'votos_reportes')->withTimestamps();
+}
+
+
 }
