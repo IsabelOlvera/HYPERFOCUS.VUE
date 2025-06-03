@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\WeekController;
+use App\Http\Controllers\GuideControler;
 
 // Esto es era una prueba
 // Route::get('/week', [WeekController::class, 'index'])->name('week');
@@ -18,3 +19,5 @@ Route::get('/week/actividades', [WeekController::class, 'obtenerActividadesActua
 Route::post('/week/completar', [WeekController::class, 'completarActividades']);
 // Route::post('/week/descompletar', [WeekController::class, 'descompletarActividades']);
 // Route::put('/week/actividad/{id}/actualizar', [WeekController::class, 'actualizarEstadoActividad']);
+
+Route::get('/guide', [GuideControler::class, 'index'])->name('guide');
