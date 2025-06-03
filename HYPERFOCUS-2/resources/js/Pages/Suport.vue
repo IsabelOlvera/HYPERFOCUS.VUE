@@ -5,7 +5,7 @@ import Sidebar from '@/Components/Sidebar.vue'
 
 <template>
   <AuthenticatedLayout>
-    <div class="flex">
+    <div class="flex bg-white">
       <!-- Sidebar -->
       <Sidebar />
 
@@ -26,7 +26,7 @@ import Sidebar from '@/Components/Sidebar.vue'
             <div class="flex flex-col items-center">
               <img src="/img/sugerencias.png" alt="Sugerencia" class="w-20 h-20 mb-4" />
               <h3 class="text-xl font-semibold mb-2">Realizar sugerencia</h3>
-              <button class="bg-purple-700 text-white px-6 py-2 rounded-full hover:bg-purple-800">Aquí</button>
+              <a href="/centro-ayuda" class="bg-purple-700 text-white px-6 py-2 rounded-full hover:bg-purple-800 text-center">Aquí</a>
             </div>
 
             <div class="flex flex-col items-center">
@@ -38,8 +38,9 @@ import Sidebar from '@/Components/Sidebar.vue'
             <div class="flex flex-col items-center">
               <img src="/img/comun.png" alt="Problemas comunes" class="w-20 h-20 mb-4" />
               <h3 class="text-xl font-semibold mb-2">Problemas comunes</h3>
-              <button class="bg-purple-700 text-white px-6 py-2 rounded-full hover:bg-purple-800">Aquí</button>
+              <a href="/preguntas" class="bg-purple-700 text-white px-6 py-2 rounded-full hover:bg-purple-800 text-center">Aquí</a>
             </div>
+
           </div>
 
           <!-- Calificación -->
