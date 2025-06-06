@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('intentos');
             $table->unsignedBigInteger('conjunto_id');
             $table->unsignedBigInteger('user_id');
-            $table->foreign('conjunto_id')->references('id')->on('conjuntos');
+            $table->foreign('conjunto_id')->references('id')->on('conjuntos')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users');
             $table->timestamps();
         });

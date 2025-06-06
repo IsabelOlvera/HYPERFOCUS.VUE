@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('conceptos', function (Blueprint $table) {
+        Schema::create('votos_reportes', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre',255);
-            $table->longtext('definicion');
-            $table->unsignedBigInteger('conjunto_id');
-            $table->foreign('conjunto_id')->references('id')->on('conjuntos')->onDelete('cascade');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('reporte_id');
+            $table->foreign('reporte_id')->references('id')->on('reportes')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('conceptos');
+        Schema::dropIfExists('votos_reportes');
     }
 };

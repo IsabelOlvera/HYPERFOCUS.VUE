@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('conceptos', function (Blueprint $table) {
+        Schema::create('estatus_reportes', function (Blueprint $table) {
             $table->id();
             $table->string('nombre',255);
-            $table->longtext('definicion');
-            $table->unsignedBigInteger('conjunto_id');
-            $table->foreign('conjunto_id')->references('id')->on('conjuntos')->onDelete('cascade');
+            $table->longText('descripcion')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('conceptos');
+        Schema::dropIfExists('estatus_reportes');
     }
 };
