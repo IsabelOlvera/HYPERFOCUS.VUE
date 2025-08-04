@@ -22,28 +22,28 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Establecer directorio de trabajo
 WORKDIR /var/www/html
 
-# Copiar todos los archivos del proyecto
+# Copiar todos los archivos del proyecto al contenedor
 COPY . .
 
-# Permisos correctos para Laravel
+# Dar permisos correctos a las carpetas necesarias
 RUN chmod -R 775 storage bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache
 
-# Instalar dependencias y compilar assets
+# Instalar dependencias de PHP y compilar assets frontend
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 RUN npm install && npm run build
 
-# Habilitar reescritura de URLs en Apache
+# Habilitar mod_rewrite de Apache
 RUN a2enmod rewrite
 
-# Copiar archivo de configuración de Apache
+# Copiar configuración personalizada de Apache (vhost)
 COPY .docker/vhost.conf /etc/apache2/sites-available/000-default.conf
 
-# Copiar script de entrada y dar permisos
+# Copiar y preparar el script de entrada
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Exponer el puerto estándar web
+# Exponer el puerto 80
 EXPOSE 80
 
-# Comando de inicio
+# Ejecutar el script de entrada al iniciar el contenedor
 CMD ["/entrypoint.sh"]
