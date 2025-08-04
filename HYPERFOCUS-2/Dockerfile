@@ -1,7 +1,7 @@
-# Usar la imagen base de PHP 8.3 con Apache
+# Imagen base con Apache y PHP 8.3
 FROM php:8.3-apache
 
-# Instalar extensiones necesarias de PHP + Node.js y npm
+# Instalar dependencias del sistema y extensiones PHP necesarias
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -9,38 +9,41 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
     unzip \
-    git \
     curl \
-    nodejs \
+    git \
     npm \
+    nodejs \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd zip pdo_mysql
 
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copiar el contenido del proyecto al contenedor
-COPY . /var/www/html
-
-# Establecer el directorio de trabajo
+# Establecer directorio de trabajo
 WORKDIR /var/www/html
 
-# Dar permisos a storage y bootstrap/cache
+# Copiar todos los archivos del proyecto al contenedor
+COPY . .
+
+# Dar permisos a las carpetas necesarias
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Habilitar el módulo de reescritura de Apache (no se usará en Render Free, pero por si acaso)
+# Instalar dependencias de PHP y compilar assets de frontend
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+RUN npm install && npm run build
+
+# Habilitar mod_rewrite de Apache
 RUN a2enmod rewrite
 
-# Instalar dependencias, compilar assets y preparar la app
-RUN composer install && \
-    npm install && npm run build && \
-    php artisan config:cache && \
-    php artisan migrate --force && \
-    php artisan db:seed --force && \
-    php artisan storage:link
+# Copiar configuración de Apache personalizada
+COPY .docker/vhost.conf /etc/apache2/sites-available/000-default.conf
 
-# Exponer el puerto usado por Laravel internamente
-EXPOSE 10000
+# Copiar y dar permisos al script de entrada
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Iniciar Laravel usando su servidor embebido
-CMD php artisan serve --host=0.0.0.0 --port=10000
+# Exponer el puerto 80
+EXPOSE 80
+
+# Ejecutar script de entrada
+CMD ["/entrypoint.sh"]
