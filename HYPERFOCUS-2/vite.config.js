@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue';
 export default defineConfig({
     plugins: [
         laravel({
-            input: 'resources/js/app.js',
+            input: ['resources/js/app.js'],
             refresh: true,
         }),
         vue({
@@ -17,4 +17,17 @@ export default defineConfig({
             },
         }),
     ],
+    // Este bloque asegura que se use HTTPS y URLs correctas
+    server: {
+        https: true,
+        host: '0.0.0.0', // importante para Docker
+        port: 5173,       // o el puerto que uses localmente para dev
+    },
+    build: {
+        manifest: true,
+        outDir: 'public/build',
+        rollupOptions: {
+            input: ['resources/js/app.js'],
+        },
+    },
 });
