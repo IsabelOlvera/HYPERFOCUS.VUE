@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Reaplicar permisos de escritura (por si el contenedor lo requiere)
+# Reparar permisos por si se reinician
 chmod -R 775 storage bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache
 
-# Esperar por si la base de datos tarda en responder
+# Esperar que la base de datos esté lista
 sleep 5
 
-# Verificar que la clave de aplicación exista
+# Verificar que exista la clave de encriptación
 if [ -z "$APP_KEY" ]; then
   echo "ERROR: APP_KEY is not set. Laravel will not run."
   exit 1

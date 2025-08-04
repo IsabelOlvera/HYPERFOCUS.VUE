@@ -17,11 +17,10 @@ export default defineConfig({
             },
         }),
     ],
-    // Este bloque asegura que se use HTTPS y URLs correctas
     server: {
         https: true,
-        host: '0.0.0.0', // importante para Docker
-        port: 5173,       // o el puerto que uses localmente para dev
+        host: '0.0.0.0',
+        port: 5173,
     },
     build: {
         manifest: true,
