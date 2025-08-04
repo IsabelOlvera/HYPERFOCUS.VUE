@@ -417,7 +417,7 @@ onUnmounted(() => {
                         </div>
                         <div class="mt-6 text-center">
                             <p class="text-xs text-purple-500">
-                                🕐 Las cartas se renuevan automáticamente cada 3 con 50 horas
+                                🕐 Regresa por mas motivación en 3 horas con 50 min.
                             </p>
                         </div>
                     </div>
