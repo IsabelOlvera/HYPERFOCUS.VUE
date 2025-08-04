@@ -1,4 +1,4 @@
-# Imagen base con Apache y PHP 8.3
+# Imagen base con PHP 8.3 y Apache
 FROM php:8.3-apache
 
 # Instalar dependencias del sistema y extensiones PHP necesarias
@@ -25,25 +25,25 @@ WORKDIR /var/www/html
 # Copiar todos los archivos del proyecto al contenedor
 COPY . .
 
-# Dar permisos a las carpetas necesarias
-RUN chown -R www-data:www-data storage bootstrap/cache
+# Dar permisos correctos a las carpetas necesarias
+RUN chmod -R 775 storage bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache
 
-# Instalar dependencias de PHP y compilar assets de frontend
+# Instalar dependencias de PHP y compilar assets frontend
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 RUN npm install && npm run build
 
 # Habilitar mod_rewrite de Apache
 RUN a2enmod rewrite
 
-# Copiar configuración de Apache personalizada
+# Copiar configuración personalizada de Apache (vhost)
 COPY .docker/vhost.conf /etc/apache2/sites-available/000-default.conf
 
-# Copiar y dar permisos al script de entrada
+# Copiar y preparar el script de entrada
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Exponer el puerto 80
 EXPOSE 80
 
-# Ejecutar script de entrada
+# Ejecutar el script de entrada al iniciar el contenedor
 CMD ["/entrypoint.sh"]
