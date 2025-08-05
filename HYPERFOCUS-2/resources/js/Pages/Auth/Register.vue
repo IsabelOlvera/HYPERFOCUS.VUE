@@ -74,7 +74,7 @@ const showConfirmPassword = ref(false);
 
                         <!-- Contraseña -->
                         <div class="mb-4 text-left">
-                            <InputLabel for="password" value="password" />
+                            <InputLabel for="password" value="Contraseña" />
                             <div class="relative">
                                 <TextInput
                                     id="password"
