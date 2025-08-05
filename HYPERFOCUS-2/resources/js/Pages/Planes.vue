@@ -23,7 +23,7 @@ import PlanesCard from "@/Components/PlanesCard.vue";
           punto1="Actividades, tarjetas y cronómetro sin límites."
           punto2="Modo de práctica para ver qué conceptos necesitas reforzar."
           punto3="Medidor de rachas con estadísticas semanales."
-          precio="$49.99.00"
+          precio="$49.99"
         />
         <PlanesCard
           encabezado="Plan Focus Pro"
