@@ -12,25 +12,25 @@ import PlanesCard from "@/Components/PlanesCard.vue";
     <div class="container mx-auto my-10">
       <div class="flex flex-wrap justify-center gap-6">
         <PlanesCard
-          encabezado="Gratis"
-          punto1="Característica 1"
-          punto2="Característica 2"
-          punto3="Característica 3"
-          precio="$10.00"
+          encabezado="Plan Focus Lite"
+          punto1="Hasta 3 listas de tareas y 2 mazos de tarjetas."
+          punto2="Temporizador Pomodoro básico (25/5).                  "
+          punto3=" Medidor de rachas para seguir tu constancia."
+          precio="$0.00"
         />
         <PlanesCard
-          encabezado="Básico"
-          punto1="Característica Básica 1"
-          punto2="Característica Básica 2"
-          punto3="Característica Básica 3"
-          precio="$15.00"
+          encabezado="Plan Focus Plus"
+          punto1="Actividades, tarjetas y cronómetro sin límites."
+          punto2="Modo de práctica para ver qué conceptos necesitas reforzar."
+          punto3="Medidor de rachas con estadísticas semanales."
+          precio="$49.99"
         />
         <PlanesCard
-          encabezado="Premium"
-          punto1="Característica Premium 1"
-          punto2="Característica Premium 2"
-          punto3="Característica Premium 3"
-          precio="$20.00"
+          encabezado="Plan Focus Pro"
+          punto1="Uso completo en todos tus dispositivos (web y móvil)"
+          punto2="Panel de progreso avanzado para ver tu evolución."
+          punto3="Medidor de rachas con análisis detallado de hábitos."
+          precio="$99.99"
         />
       </div>
     </div>
